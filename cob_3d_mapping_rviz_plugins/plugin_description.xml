@@ -1,0 +1,7 @@
+<library path="lib/libcob_3d_mapping_rviz_plugins">
+  <class name="rviz/ShapeDisplay" type="rviz::ShapeDisplay" base_class_type="rviz::Display">
+    <description>
+      displays Shape
+    </description>
+  </class>
+</library>
