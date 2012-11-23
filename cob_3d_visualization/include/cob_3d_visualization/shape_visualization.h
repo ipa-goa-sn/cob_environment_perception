@@ -140,7 +140,11 @@ class ShapeVisualization
      * @brief Create menu entries for the text
      */
     void optionMenu() ;
-//    void findTables(const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback);
+    //    void findTables(const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback);
+    /**
+     * @brief Callback for ogre Camera position
+     */
+    void camPosition(const geometry_msgs::Pose &cam_pose);
 
   protected:
 
@@ -148,6 +152,7 @@ class ShapeVisualization
     //    ros::Publisher shape_pub_ ;
     ros::Subscriber shape_array_sub_; // sub for shape array msgs
     ros::Subscriber feedback_sub_ ;
+    ros::Subscriber camera_position_sub_;
     ros::Publisher marker_pub_;
     std::vector<boost::shared_ptr<ShapeMarker> > v_sm_;
     cob_3d_mapping_msgs::ShapeArray sha ;
@@ -158,16 +163,17 @@ class ShapeVisualization
     std::vector<unsigned int> interacted_shapes_;
     std::vector<unsigned int> deleted_markers_indices_;
     cob_3d_mapping_msgs::ShapeArray modified_shapes_;
-//    unsigned int deleted_ ;
+    //    unsigned int deleted_ ;
 
+    geometry_msgs::Pose ogre_camera_position_;
 
     Eigen::Quaternionf quatInit ;
     Eigen::Vector3f oldCentroid ;
     Eigen::Matrix4f transInit;
     Eigen::Affine3f affineInit;
     Eigen::Matrix4f transInitInv;
-//    cob_3d_mapping_msgs::ModifyMap::Request req ;
-//    cob_3d_mapping_msgs::ModifyMap::Response res;
+    //    cob_3d_mapping_msgs::ModifyMap::Request req ;
+    //    cob_3d_mapping_msgs::ModifyMap::Response res;
 
 
 

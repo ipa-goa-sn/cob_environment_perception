@@ -76,6 +76,7 @@ ShapeVisualization::ShapeVisualization () :ctr_for_shape_indexes (0)
       shape_array_sub_ = nh_.subscribe ("shape_array", 1, &ShapeVisualization::shapeArrayCallback, this);
       feedback_sub_ = nh_.subscribe("geometry_map/map/feedback",1,&ShapeVisualization::setShapePosition,this);
       marker_pub_ = nh_.advertise<visualization_msgs::Marker> ("marker", 1);
+      camera_position_sub_ = nh_.subscribe("rviz/camera_position",1,&ShapeVisualization::camPosition,this);
       //      shape_pub_ = nh_.advertise<cob_3d_mapping_msgs::ShapeArray> ("shape_array", 1);
       //      get_table_subscriber_ = nh_.subscribe("shape_array", 1, &ShapeVisualization::findTables,this);
       im_server_.reset (new interactive_markers::InteractiveMarkerServer ("geometry_map/map", "", false));
@@ -417,6 +418,13 @@ void ShapeVisualization::moreOptions()
   Text.pose.position.y = 0;
   Text.pose.position.z = 0.5;
 
+  /*uncomment if u want to set the pose to a fixed position wrt ogre camera view
+   *
+   * Text.pose.position.x = ogre_camera_position_.position.x;
+     Text.pose.position.y = ogre_camera_position_.position.y;
+     Text.pose.position.z = ogre_camera_position_.position.z;
+   * */
+
   Text.pose.orientation.x = 0;
   Text.pose.orientation.y = 0;
   Text.pose.orientation.z = 0;
@@ -562,14 +570,17 @@ void ShapeVisualization::optionMenu() {
 
 
 }
-
+void ShapeVisualization::camPosition(const geometry_msgs::Pose &cam_pose){
+  ogre_camera_position_.position.x = cam_pose.position.x ;
+  ogre_camera_position_.position.y = cam_pose.position.y ;
+  ogre_camera_position_.position.z = cam_pose.position.z ;
+}
 void
 ShapeVisualization::shapeArrayCallback (const cob_3d_mapping_msgs::ShapeArrayPtr& sa)
 {
   //  ctr_for_shape_indexes = 0 ;
   v_sm_.clear();
   sha.shapes.clear() ;
-  im_server_->applyChanges();
   ROS_INFO("shape array with %d shapes received", sa->shapes.size());
 
   for (unsigned int i = 0; i < sa->shapes.size (); i++)
@@ -583,7 +594,7 @@ ShapeVisualization::shapeArrayCallback (const cob_3d_mapping_msgs::ShapeArrayPtr
     v_sm_.push_back(sm);
     marker_pub_.publish(sm->getMarker());
   }
-  //    im_server_->applyChanges(); //update changes
+//      im_server_->applyChanges(); //update changes
 }
 
 int
