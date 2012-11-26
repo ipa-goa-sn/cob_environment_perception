@@ -76,6 +76,7 @@
 #include <cob_3d_mapping_msgs/GetTables.h>
 #include <cob_3d_mapping_msgs/GetObjectsOfClass.h>
 #include <tf/transform_listener.h>
+#include <tf/transform_broadcaster.h>
 
 
 

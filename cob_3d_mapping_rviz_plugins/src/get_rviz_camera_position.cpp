@@ -14,43 +14,43 @@ namespace rviz
      ogre_camera_ = view_controller_->getCamera();
 
      tf_filter_.connectInput(sub_);
-     tf_filter_.registerCallback(boost::bind(&ShapeDisplay::getCamPose, this, _1));
+     tf_filter_.registerCallback(boost::bind(&GetRvizCameraPosition::getCamPose, this, _1));
 
      rviz_camera_position_pub_ = nh_.advertise<geometry_msgs::Pose> ("rviz/camera_position", 1);
   }
 
-  GetRvizCameraPosition::~GetRvizCameraPosition()
-  {
-  }
 
-
-  static inline geometry_msgs::Point pointOgreToMsg(const Ogre::Vector3 &o)
+  geometry_msgs::Point GetRvizCameraPosition::pointOgreToMsg(const Ogre::Vector3 &o)
   {
     geometry_msgs::Point m;
     m.x = o.x; m.y = o.y; m.z = o.z;
     return m;
   }
 
-  void getCamPose() {
+  void GetRvizCameraPosition::getCamPose(ViewController* source_view) {
 
-  QVariant target_frame = source_view->subProp( "Target Frame" )->getValue();
-      if( target_frame.isValid() )
-      {
+//  QVariant target_frame = source_view->subProp( "Target Frame" )->getValue();
+//      if( target_frame.isValid() )
+//      {
 
-      Ogre::Vector3 position = ogre_camera_->getPosition();
-      Ogre::Quaternion orientation = ogre_camera_->getOrientation();
+      Ogre::Vector3 position = ogre_camera_->getRealPosition();            //Gets the real world position of the camera
+      Ogre::Quaternion orientation = ogre_camera_->getRealOrientation();   //Gets the real world orientation of the camera
 
-      geometry_msgs::Point camPosition    = pointOgreToMsg(position) ;
       geometry_msgs::Pose camPose ;
 
-      camPose.position.x = Point.x ;
-      camPose.position.y = Point.y ;
-      camPose.position.z = Point.z ;
+      camPose.position.x = position.x ;
+      camPose.position.y = position.y ;
+      camPose.position.z = position.z ;
+
+      camPose.orientation.x = orientation.x ;
+      camPose.orientation.y = orientation.y ;
+      camPose.orientation.z = orientation.z ;
+
 
       rviz_camera_position_pub_.publish(camPose) ;
 
 
-  }
+//  }
   }
 
 

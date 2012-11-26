@@ -72,16 +72,16 @@ using namespace cob_3d_mapping;
 
 ShapeVisualization::ShapeVisualization () :ctr_for_shape_indexes (0)
 
-    {
-      shape_array_sub_ = nh_.subscribe ("shape_array", 1, &ShapeVisualization::shapeArrayCallback, this);
-      feedback_sub_ = nh_.subscribe("geometry_map/map/feedback",1,&ShapeVisualization::setShapePosition,this);
-      marker_pub_ = nh_.advertise<visualization_msgs::Marker> ("marker", 1);
-      camera_position_sub_ = nh_.subscribe("rviz/camera_position",1,&ShapeVisualization::camPosition,this);
-      //      shape_pub_ = nh_.advertise<cob_3d_mapping_msgs::ShapeArray> ("shape_array", 1);
-      //      get_table_subscriber_ = nh_.subscribe("shape_array", 1, &ShapeVisualization::findTables,this);
-      im_server_.reset (new interactive_markers::InteractiveMarkerServer ("geometry_map/map", "", false));
-      moreOptions() ;
-    }
+{
+  shape_array_sub_ = nh_.subscribe ("shape_array", 1, &ShapeVisualization::shapeArrayCallback, this);
+  feedback_sub_ = nh_.subscribe("geometry_map/map/feedback",1,&ShapeVisualization::setShapePosition,this);
+  marker_pub_ = nh_.advertise<visualization_msgs::Marker> ("marker", 1);
+  camera_position_sub_ = nh_.subscribe("rviz/camera_position",1,&ShapeVisualization::camPosition,this);
+  //      shape_pub_ = nh_.advertise<cob_3d_mapping_msgs::ShapeArray> ("shape_array", 1);
+  //      get_table_subscriber_ = nh_.subscribe("shape_array", 1, &ShapeVisualization::findTables,this);
+  im_server_.reset (new interactive_markers::InteractiveMarkerServer ("geometry_map/map", "", false));
+  moreOptions() ;
+}
 
 void ShapeVisualization::setShapePosition(const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback)//,const cob_3d_mapping_msgs::Shape& shape)
 {
@@ -111,18 +111,18 @@ void ShapeVisualization::setShapePosition(const visualization_msgs::InteractiveM
 
     for(unsigned int i=0;i<sha.shapes.size();++i)
     {
-    	if (sha.shapes[i].id == shape_id)
-	{
-		index = i;
-	}
+      if (sha.shapes[i].id == shape_id)
+      {
+        index = i;
+      }
     }
     // temporary fix.
     //do nothing if index of shape is not found
     // this is not supposed to occur , but apparently it does
     if(index==-1){
-    ROS_WARN("shape not in map array");
-    return;
-	}
+      ROS_WARN("shape not in map array");
+      return;
+    }
 
     cob_3d_mapping::fromROSMsg (sha.shapes.at(index), p);
 
@@ -155,8 +155,8 @@ void ShapeVisualization::setShapePosition(const visualization_msgs::InteractiveM
       /* the name of the marker is arrows_shape_.id, we need to erase the "arrows_" part */
       //string strName(feedback->marker_name);
       //strName.erase(strName.begin(),strName.begin()+7);
-//      stringstream name(strName);
-	stringstream name(feedback->marker_name);
+      //      stringstream name(strName);
+      stringstream name(feedback->marker_name);
 
       /* the name of the marker is arrows_shape_.id, we need to erase the "arrows_" part */
       //      int test ;
@@ -402,7 +402,7 @@ void ShapeVisualization::moreOptions()
   Text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
   Text.action = visualization_msgs::Marker::ADD;
   Text.lifetime = ros::Duration ();
-  Text.header.frame_id = "/map" ;
+  Text.header.frame_id = "/map" ;   // change the frame id to "/camera_view if you want to make the text position move wrt to camera view" ;
 
   Text.id = 0;
   Text.ns = "text";
@@ -414,16 +414,10 @@ void ShapeVisualization::moreOptions()
   Text.scale.z = 0.3;
 
   // Pose
-  Text.pose.position.x = 0;
+  Text.pose.position.x = 0;    // set the position to a constant value in /camera_view coordinate frame
   Text.pose.position.y = 0;
   Text.pose.position.z = 0.5;
 
-  /*uncomment if u want to set the pose to a fixed position wrt ogre camera view
-   *
-   * Text.pose.position.x = ogre_camera_position_.position.x;
-     Text.pose.position.y = ogre_camera_position_.position.y;
-     Text.pose.position.z = ogre_camera_position_.position.z;
-   * */
 
   Text.pose.orientation.x = 0;
   Text.pose.orientation.y = 0;
@@ -570,10 +564,20 @@ void ShapeVisualization::optionMenu() {
 
 
 }
-void ShapeVisualization::camPosition(const geometry_msgs::Pose &cam_pose){
-  ogre_camera_position_.position.x = cam_pose.position.x ;
-  ogre_camera_position_.position.y = cam_pose.position.y ;
-  ogre_camera_position_.position.z = cam_pose.position.z ;
+void ShapeVisualization::camPosition(const geometry_msgs::Pose &camPose){
+  ogre_camera_position_.position.x = camPose.position.x ;
+  ogre_camera_position_.position.y = camPose.position.y ;
+  ogre_camera_position_.position.z = camPose.position.z ;
+
+  // get robot position
+  tf::TransformBroadcaster br;
+  tf::Transform transform;
+
+  transform.setOrigin( tf::Vector3(camPose.position.x, camPose.position.y, camPose.position.z) );
+  transform.setRotation( tf::Quaternion(camPose.orientation.x, camPose.orientation.y,camPose.orientation.z));
+
+  br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "world", "/camera_view"));
+
 }
 void
 ShapeVisualization::shapeArrayCallback (const cob_3d_mapping_msgs::ShapeArrayPtr& sa)
@@ -594,7 +598,7 @@ ShapeVisualization::shapeArrayCallback (const cob_3d_mapping_msgs::ShapeArrayPtr
     v_sm_.push_back(sm);
     marker_pub_.publish(sm->getMarker());
   }
-//      im_server_->applyChanges(); //update changes
+  //      im_server_->applyChanges(); //update changes
 }
 
 int
