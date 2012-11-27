@@ -297,7 +297,7 @@ void ShapeMarker::resetMarker(){
   }
 }
 
-  //  interacted_shapes_.pop_back() ;
+//  interacted_shapes_.pop_back() ;
 
 void
 ShapeMarker::createShapeMenu ()
@@ -493,7 +493,7 @@ ShapeMarker::createMarker (visualization_msgs::InteractiveMarkerControl& im_ctrl
     switch(shape_.type)
     {
       case(cob_3d_mapping_msgs::Shape::POLYGON):
-      {
+          {
         for (long i = 0; i < it->GetNumPoints (); i++)
         {
           pt = it->GetPoint (i);
@@ -502,9 +502,9 @@ ShapeMarker::createMarker (visualization_msgs::InteractiveMarkerControl& im_ctrl
           marker.points[3*ctr+i].z = 0;
         }
         //std::cout << marker.points.size() << std::endl;
-      }
+          }
       case(cob_3d_mapping_msgs::Shape::CYLINDER):
-      {
+          {
         for (long i = 0; i < it->GetNumPoints (); i++)
         {
           pt = it->GetPoint(i);
@@ -526,7 +526,7 @@ ShapeMarker::createMarker (visualization_msgs::InteractiveMarkerControl& im_ctrl
           //marker.points[i].y = pt.y;
           //marker.points[i].z = 0;
         }
-      }
+          }
     }
     ctr++;
   }
@@ -1040,6 +1040,8 @@ void ShapeMarker::displayContour(){
   stringstream aa;
   stringstream ss;
   int ctr = 0;
+  ss.clear();
+  ss.str("");
 
   visualization_msgs::Marker marker;
   marker.action = visualization_msgs::Marker::ADD;
@@ -1083,7 +1085,11 @@ void ShapeMarker::displayContour(){
   }
 
   im_ctrl_.always_visible = true ;
-  im_ctrl_.interaction_mode = visualization_msgs::InteractiveMarkerControl::BUTTON;
+  ss << "contour_ctrl_" << shape_.id;
+  im_ctrl_.name = ss.str() ;
+  ss.clear();
+  ss.str("");
+  //  im_ctrl_.interaction_mode = visualization_msgs::InteractiveMarkerControl::BUTTON;
 
   ss << "contour_" << shape_.id;
   imarker.name = ss.str() ;
